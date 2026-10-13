@@ -1,4 +1,5 @@
 """Database connection and request-scoped sessions."""
+
 import os
 from collections.abc import Generator
 

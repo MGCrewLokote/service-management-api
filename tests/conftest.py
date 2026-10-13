@@ -1,4 +1,5 @@
 """Isolated in-memory database for API tests."""
+
 from collections.abc import Generator
 
 import pytest
@@ -9,7 +10,6 @@ from sqlalchemy.pool import StaticPool
 
 from app.database import Base, get_db
 from app.main import app
-from app import models  # noqa: F401
 
 
 @pytest.fixture

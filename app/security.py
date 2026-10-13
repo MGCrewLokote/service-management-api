@@ -2,6 +2,7 @@
 
 This is deliberately NOT a multi-user production authentication system.
 """
+
 import os
 import secrets
 

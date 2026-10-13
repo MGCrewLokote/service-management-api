@@ -1,4 +1,5 @@
 """API behavior and authorization tests."""
+
 from fastapi.testclient import TestClient
 
 AUTH = {"Authorization": "Bearer unit-test-token"}

@@ -1,4 +1,5 @@
 """Ticket endpoints, filtering, pagination and CRUD operations."""
+
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status

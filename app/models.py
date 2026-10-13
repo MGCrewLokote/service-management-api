@@ -1,4 +1,5 @@
 """Persistence models."""
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, Integer, String, Text, func
