@@ -5,6 +5,7 @@ This is deliberately NOT a multi-user production authentication system.
 
 import os
 import secrets
+from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -13,7 +14,7 @@ bearer = HTTPBearer(auto_error=False)
 
 
 def require_api_token(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
 ) -> None:
     expected = os.getenv("APP_API_TOKEN")
     if not expected:

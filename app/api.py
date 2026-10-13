@@ -1,6 +1,6 @@
 """Ticket endpoints, filtering, pagination and CRUD operations."""
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select
@@ -18,6 +18,8 @@ from app.schemas import (
 )
 from app.security import require_api_token
 
+DbSession = Annotated[Session, Depends(get_db)]
+
 router = APIRouter(
     prefix="/tickets",
     tags=["tickets"],
@@ -33,7 +35,7 @@ def get_ticket_or_404(db: Session, ticket_id: int) -> Ticket:
 
 
 @router.post("", response_model=TicketRead, status_code=status.HTTP_201_CREATED)
-def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)) -> Ticket:
+def create_ticket(payload: TicketCreate, db: DbSession) -> Ticket:
     ticket = Ticket(**payload.model_dump(mode="json"))
     db.add(ticket)
     db.commit()
@@ -43,13 +45,13 @@ def create_ticket(payload: TicketCreate, db: Session = Depends(get_db)) -> Ticke
 
 @router.get("", response_model=TicketPage)
 def list_tickets(
-    db: Session = Depends(get_db),
-    status_filter: TicketStatus | None = Query(default=None, alias="status"),
+    db: DbSession,
+    status_filter: Annotated[TicketStatus | None, Query(alias="status")] = None,
     priority: TicketPriority | None = None,
     assigned_to: str | None = None,
     sort: Literal["newest", "oldest"] = "newest",
-    limit: int = Query(default=20, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
 ) -> TicketPage:
     filters = []
     if status_filter is not None:
@@ -68,7 +70,7 @@ def list_tickets(
 
 
 @router.get("/{ticket_id}", response_model=TicketRead)
-def read_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Ticket:
+def read_ticket(ticket_id: int, db: DbSession) -> Ticket:
     return get_ticket_or_404(db, ticket_id)
 
 
@@ -76,7 +78,7 @@ def read_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Ticket:
 def update_ticket(
     ticket_id: int,
     payload: TicketUpdate,
-    db: Session = Depends(get_db),
+    db: DbSession,
 ) -> Ticket:
     ticket = get_ticket_or_404(db, ticket_id)
     changes = payload.model_dump(exclude_unset=True, mode="json")
@@ -91,7 +93,7 @@ def update_ticket(
 
 
 @router.delete("/{ticket_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_ticket(ticket_id: int, db: Session = Depends(get_db)) -> Response:
+def delete_ticket(ticket_id: int, db: DbSession) -> Response:
     ticket = get_ticket_or_404(db, ticket_id)
     db.delete(ticket)
     db.commit()
